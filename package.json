@@ -1,0 +1,12 @@
+{
+  "name": "sftp-autosync",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Valet-style SFTP auto-sync daemon using Bun and OpenSSH ControlMaster",
+  "scripts": {
+    "start": "bun sync.js",
+    "dev": "bun sync.js",
+    "test": "bun test"
+  }
+}

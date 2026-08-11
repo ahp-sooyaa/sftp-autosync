@@ -1,0 +1,19 @@
+{
+  "parents": ["~/Clickr"],
+  "ignore": [".git", "node_modules", ".DS_Store", ".sftp-autosync", "*.tmp", "*.swp"],
+  "debounceMs": 200,
+  "rescanMs": 15000,
+  "concurrency": 3,
+  "notify": {
+    "enabled": true,
+    "slowMs": 2000,
+    "delayMs": 0,
+    "onSuccess": false,
+    "onFailure": true
+  },
+  "ssh": {
+    "controlPersist": "10m",
+    "connectTimeout": 15,
+    "controlDir": "~/Library/Caches/sftp-autosync/cm"
+  }
+}

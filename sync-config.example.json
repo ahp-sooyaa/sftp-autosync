@@ -1,13 +1,13 @@
 {
-  "host": "example.s1.clickrlabs.com",
-  "port": 8288,
+  "host": "sftp.example.com",
+  "port": 22,
   "username": "deploy",
   "privateKeyPath": "~/.ssh/id_ed25519",
-  "remotePath": "/home/deploy/public_html/my-project",
+  "remotePath": "/var/www/my-project",
   "routes": [
     {
-      "local": "iwov-resources",
-      "remote": "/home/deploy/public_html/iwov-resources"
+      "local": "shared-assets",
+      "remote": "/var/www/shared-assets"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "parents": ["~/Clickr"],
+  "parents": ["~/Sites"],
   "ignore": [".git", "node_modules", ".DS_Store", ".sftp-autosync", "*.tmp", "*.swp"],
   "debounceMs": 200,
   "rescanMs": 15000,

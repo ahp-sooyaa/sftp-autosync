@@ -1,6 +1,6 @@
 # SFTP Auto-Sync
 
-Valet-style SFTP auto-sync for macOS. Park a parent folder (default `~/Clickr`); every child project with `.sftp-autosync/sync-config.json` is watched and uploaded over **OpenSSH ControlMaster**.
+Valet-style SFTP auto-sync for macOS. Park a parent folder (default `~/Sites`); every child project with `.sftp-autosync/sync-config.json` is watched and uploaded over **OpenSSH ControlMaster**.
 
 ## Requirements
 
@@ -10,13 +10,13 @@ Valet-style SFTP auto-sync for macOS. Park a parent folder (default `~/Clickr`);
 
 ## Quick start
 
-1. Global config parks `~/Clickr` (see `config.json`).
+1. Global config parks `~/Sites` (copy `config.example.json` → `config.json`).
 
-2. In a project under `~/Clickr`, create a local meta folder (keep it out of git):
+2. In a project under `~/Sites`, create a local meta folder (keep it out of git):
 
 ```bash
 mkdir -p .sftp-autosync
-cp ~/Personal/sftp-autosync/sync-config.example.json .sftp-autosync/sync-config.json
+cp /path/to/sftp-autosync/sync-config.example.json .sftp-autosync/sync-config.json
 echo '.sftp-autosync/' >> .gitignore
 # edit .sftp-autosync/sync-config.json
 ```
@@ -25,13 +25,13 @@ Example `.sftp-autosync/sync-config.json`:
 
 ```json
 {
-  "host": "example.s1.clickrlabs.com",
-  "port": 8288,
+  "host": "sftp.example.com",
+  "port": 22,
   "username": "deploy",
   "privateKeyPath": "~/.ssh/id_ed25519",
-  "remotePath": "/home/deploy/public_html/my-project",
+  "remotePath": "/var/www/my-project",
   "routes": [
-    { "local": "iwov-resources", "remote": "/home/deploy/public_html/iwov-resources" }
+    { "local": "shared-assets", "remote": "/var/www/shared-assets" }
   ]
 }
 ```
@@ -39,7 +39,7 @@ Example `.sftp-autosync/sync-config.json`:
 3. Run in the foreground to verify:
 
 ```bash
-cd ~/Personal/sftp-autosync
+cd /path/to/sftp-autosync
 bun sync.js
 ```
 
@@ -59,11 +59,11 @@ Example `status.json`:
 
 ```json
 {
-  "project": "dbs-foundation-revamp",
+  "project": "my-project",
   "state": "ok",
   "op": "upload",
   "file": "package.json",
-  "remote": "/home/.../package.json",
+  "remote": "/var/www/my-project/package.json",
   "error": null,
   "durationMs": 180,
   "at": "2026-08-11T10:00:00.000Z"
@@ -73,7 +73,7 @@ Example `status.json`:
 Follow a project log:
 
 ```bash
-tail -f ~/Clickr/dbs-foundation-revamp/.sftp-autosync/sync.log
+tail -f ~/Sites/my-project/.sftp-autosync/sync.log
 ```
 
 ### macOS notifications
@@ -90,8 +90,8 @@ Configured in global `config.json` → `notify`:
 Longest matching `routes[].local` prefix wins; everything else maps under `remotePath`.
 
 ```
-my-project/                 -> /home/deploy/public_html/my-project
-└── iwov-resources/         -> /home/deploy/public_html/iwov-resources
+my-project/                 -> /var/www/my-project
+└── shared-assets/          -> /var/www/shared-assets
 ```
 
 Same host/user/key shares one ControlMaster socket across routes and projects.
@@ -99,7 +99,7 @@ Same host/user/key shares one ControlMaster socket across routes and projects.
 ## launchd (start at login)
 
 ```bash
-cd ~/Personal/sftp-autosync
+cd /path/to/sftp-autosync
 bun launchd/install.js          # install + load
 bun launchd/install.js --uninstall
 ```

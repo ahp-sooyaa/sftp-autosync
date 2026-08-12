@@ -18,10 +18,18 @@ bun install -g sftp-autosync
 sftp-autosync init       # interactive: global config, parents, optional launchd
 cd ~/Sites/my-project
 sftp-autosync setup      # interactive prompts (arrow keys to select)
+sftp-autosync push       # optional: upload whole project (or paths) now
 sftp-autosync start      # foreground watcher (or use launchd from init)
 ```
 
 If you run `setup` before `init`, the CLI offers to run `init` first.
+
+During interactive `setup`, you are asked whether the project is already synced with the remote:
+
+- **Yes** → seed local content hashes (no upload; trust remote already matches)
+- **No** → choose full upload now, or skip and upload only when files change
+
+Non-interactive defaults to skip (`--no-push`). Use `--already-synced` or `--push` to opt in.
 
 Global config lives at:
 
@@ -51,12 +59,15 @@ You should see `[watch] add project ...` for each project that has `.sftp-autosy
 ```bash
 sftp-autosync init [--parents ~/Sites] [--force] [--launchd|--no-launchd]
 sftp-autosync setup [projectDir] [--host …] [--username …] [--remote-path …] \
-  [--private-key ~/.ssh/id_ed25519] [--port 22] [--force] [--check|--no-check]
+  [--private-key ~/.ssh/id_ed25519] [--port 22] [--force] [--check|--no-check] \
+  [--already-synced|--push|--no-push]
+sftp-autosync push [projectDir] [paths…] [--force]
 sftp-autosync start
 ```
 
 In a terminal, values are gathered with interactive prompts (text + arrow-key selects). Flags skip individual questions. Non-interactive `setup` requires `--host`, `--username`, and `--remote-path`.
 
+`push` uploads the whole project when no paths are given, or only the listed files/folders. Fingerprints are updated under `.sftp-autosync/content-hashes.json`.
 > Note: bare `bun init` is Bun’s own package scaffolder — use `sftp-autosync init`.
 
 ## Per-project visibility
@@ -66,6 +77,7 @@ Each project keeps local state under `.sftp-autosync/` (never uploaded, gitignor
 | File | Purpose |
 | --- | --- |
 | `sync-config.json` | Host, key, remote paths (secrets — do not commit) |
+| `content-hashes.json` | SHA-256 fingerprints after successful upload / seed |
 | `sync.log` | Append-only history (`uploading` / `ok` / `error`) |
 | `status.json` | Latest op snapshot for agents / scripts |
 
@@ -134,7 +146,8 @@ Default ignores: `.git`, `node_modules`, `.DS_Store`, `.sftp-autosync`, `*.tmp`,
 
 ## Notes
 
-- Uploads skip when file bytes match the last *successful* upload fingerprint (SHA-256). Same-content rewrites after a sync no longer hit the remote.
+- Default `debounceMs` is `1000` (coalesce rapid editor saves).
+- Uploads skip when file bytes match a stored fingerprint (after a successful upload, `push`, or `--already-synced` seed). Same-content IDE rewrites no longer hit the remote, including after daemon restart.
 - New projects appear after you add `.sftp-autosync/sync-config.json` (parent watch + periodic rescan).
 - Connection reuse: `ControlMaster=auto` + `ControlPersist` under `~/Library/Caches/sftp-autosync/cm`.
 - Prefer `ssh-agent` for passphrase-protected keys.

@@ -4,6 +4,7 @@
  *
  *   sftp-autosync init
  *   sftp-autosync setup
+ *   sftp-autosync push
  *   sftp-autosync start
  *
  * After `bun link` from this repo, the command is on your PATH.
@@ -13,6 +14,7 @@ import { resolve } from "node:path";
 import { printHelp, repoRoot } from "../lib/cli.js";
 import { runInit } from "../lib/commands/init.js";
 import { ensureInitialized } from "../lib/commands/ensure-init.js";
+import { runPush } from "../lib/commands/push.js";
 import { runSetup } from "../lib/commands/setup.js";
 
 async function runStart(argv) {
@@ -56,6 +58,11 @@ async function main() {
 
   if (command === "setup") {
     await runSetup(rest);
+    return;
+  }
+
+  if (command === "push") {
+    await runPush(rest);
     return;
   }
 

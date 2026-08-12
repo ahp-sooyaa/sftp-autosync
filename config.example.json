@@ -1,7 +1,7 @@
 {
   "parents": ["~/Sites"],
   "ignore": [".git", "node_modules", ".DS_Store", ".sftp-autosync", "*.tmp", "*.swp"],
-  "debounceMs": 200,
+  "debounceMs": 1000,
   "rescanMs": 15000,
   "concurrency": 3,
   "notify": {

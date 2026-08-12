@@ -41,6 +41,7 @@
     "start": "bun sync.js",
     "dev": "bun sync.js",
     "init": "bun bin/sftp-autosync.js init",
+    "push": "bun bin/sftp-autosync.js push",
     "setup": "bun bin/sftp-autosync.js setup",
     "test": "bun test"
   },

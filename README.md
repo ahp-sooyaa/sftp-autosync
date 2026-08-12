@@ -122,6 +122,7 @@ Default ignores: `.git`, `node_modules`, `.DS_Store`, `.sftp-autosync`, `*.tmp`,
 
 ## Notes
 
+- Uploads skip when file bytes match the last *successful* upload fingerprint (SHA-256). Same-content rewrites after a sync no longer hit the remote.
 - New projects appear after you add `.sftp-autosync/sync-config.json` (parent watch + periodic rescan).
 - Connection reuse: `ControlMaster=auto` + `ControlPersist` under `~/Library/Caches/sftp-autosync/cm`.
 - Prefer `ssh-agent` for passphrase-protected keys.

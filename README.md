@@ -10,16 +10,24 @@ Valet-style SFTP auto-sync for macOS. Park a parent folder (default `~/Sites`); 
 
 ## Quick start
 
-1. Global config parks `~/Sites` (copy `config.example.json` → `config.json`).
-
-2. In a project under `~/Sites`, create a local meta folder (keep it out of git):
-
 ```bash
-mkdir -p .sftp-autosync
-cp /path/to/sftp-autosync/sync-config.example.json .sftp-autosync/sync-config.json
-echo '.sftp-autosync/' >> .gitignore
-# edit .sftp-autosync/sync-config.json
+bun install -g sftp-autosync
+# or: npm install -g sftp-autosync
+# or: brew tap ahp-sooyaa/sftp-autosync && brew install --HEAD sftp-autosync
+
+sftp-autosync init       # interactive: global config, parents, optional launchd
+cd ~/Sites/my-project
+sftp-autosync setup      # interactive prompts (arrow keys to select)
+sftp-autosync start      # foreground watcher (or use launchd from init)
 ```
+
+If you run `setup` before `init`, the CLI offers to run `init` first.
+
+Global config lives at:
+
+`~/Library/Application Support/sftp-autosync/config.json`
+
+`setup` writes `.sftp-autosync/sync-config.json`, adds `.sftp-autosync/` to `.gitignore`, and can probe SSH.
 
 Example `.sftp-autosync/sync-config.json`:
 
@@ -36,14 +44,20 @@ Example `.sftp-autosync/sync-config.json`:
 }
 ```
 
-3. Run in the foreground to verify:
+You should see `[watch] add project ...` for each project that has `.sftp-autosync/sync-config.json`.
+
+### CLI reference
 
 ```bash
-cd /path/to/sftp-autosync
-bun sync.js
+sftp-autosync init [--parents ~/Sites] [--force] [--launchd|--no-launchd]
+sftp-autosync setup [projectDir] [--host …] [--username …] [--remote-path …] \
+  [--private-key ~/.ssh/id_ed25519] [--port 22] [--force] [--check|--no-check]
+sftp-autosync start
 ```
 
-You should see `[watch] add project ...` for each project that has `.sftp-autosync/sync-config.json`.
+In a terminal, values are gathered with interactive prompts (text + arrow-key selects). Flags skip individual questions. Non-interactive `setup` requires `--host`, `--username`, and `--remote-path`.
+
+> Note: bare `bun init` is Bun’s own package scaffolder — use `sftp-autosync init`.
 
 ## Per-project visibility
 
@@ -78,7 +92,7 @@ tail -f ~/Sites/my-project/.sftp-autosync/sync.log
 
 ### macOS notifications
 
-Configured in global `config.json` → `notify`:
+Configured in global config → `notify`:
 
 - **Failure** → always notify (default)
 - **Slow** → notify if an op is still running after `slowMs` (default 2000), then notify again when it finishes if it was slow
@@ -99,9 +113,7 @@ Same host/user/key shares one ControlMaster socket across routes and projects.
 ## launchd (start at login)
 
 ```bash
-cd /path/to/sftp-autosync
-bun launchd/install.js          # install + load
-bun launchd/install.js --uninstall
+sftp-autosync init --launchd    # or answer Yes during interactive init
 ```
 
 Daemon stdout/stderr (startup / watch events):
@@ -126,3 +138,39 @@ Default ignores: `.git`, `node_modules`, `.DS_Store`, `.sftp-autosync`, `*.tmp`,
 - New projects appear after you add `.sftp-autosync/sync-config.json` (parent watch + periodic rescan).
 - Connection reuse: `ControlMaster=auto` + `ControlPersist` under `~/Library/Caches/sftp-autosync/cm`.
 - Prefer `ssh-agent` for passphrase-protected keys.
+
+## Development
+
+Clone and run from the repo:
+
+```bash
+git clone git@github.com:ahp-sooyaa/sftp-autosync.git
+cd sftp-autosync
+bun install
+bun run init
+bun run setup
+bun test
+```
+
+Git-based global install (no npm publish):
+
+```bash
+bun install -g github:ahp-sooyaa/sftp-autosync
+```
+
+## Homebrew
+
+Tap and install HEAD (until a stable brew release is published):
+
+```bash
+brew tap ahp-sooyaa/sftp-autosync https://github.com/ahp-sooyaa/homebrew-sftp-autosync
+brew install --HEAD sftp-autosync
+```
+
+Or install the formula directly from a checkout:
+
+```bash
+brew install --HEAD --formula Formula/sftp-autosync.rb
+```
+
+After `v0.2.0` is tagged on GitHub, the tap formula can pin a versioned tarball with `sha256`.

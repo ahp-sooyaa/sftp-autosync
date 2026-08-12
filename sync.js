@@ -1,17 +1,17 @@
 #!/usr/bin/env bun
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { expandHome, loadGlobalConfig } from "./lib/config.js";
+import { resolveConfigArg, resolveGlobalConfigPath } from "./lib/paths.js";
 import { SshPool } from "./lib/ssh-pool.js";
 import { ProjectWatcher } from "./lib/watcher.js";
+import { fileURLToPath } from "node:url";
 
-const here = fileURLToPath(new URL(".", import.meta.url));
+const packageRoot = fileURLToPath(new URL(".", import.meta.url));
 
 function parseArgs(argv) {
-  let configPath = resolve(here, "config.json");
+  let configPath = resolveGlobalConfigPath(packageRoot);
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--config" && argv[i + 1]) {
-      configPath = expandHome(argv[++i]);
+      configPath = resolveConfigArg(argv[++i], packageRoot);
     }
   }
   return { configPath };

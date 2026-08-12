@@ -7,14 +7,11 @@
 
   <key>ProgramArguments</key>
   <array>
-    <string>__BUN_PATH__</string>
-    <string>__SYNC_JS_PATH__</string>
-    <string>--config</string>
-    <string>__CONFIG_PATH__</string>
+__PROGRAM_ARGUMENTS__
   </array>
 
   <key>WorkingDirectory</key>
-  <string>__WORKING_DIRECTORY__</string>
+  <string>__HOME__</string>
 
   <key>RunAtLoad</key>
   <true/>

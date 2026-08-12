@@ -1,12 +1,50 @@
 {
   "name": "sftp-autosync",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.2.0",
+  "description": "Valet-style SFTP auto-sync daemon for macOS using Bun and OpenSSH ControlMaster",
   "type": "module",
-  "description": "Valet-style SFTP auto-sync daemon using Bun and OpenSSH ControlMaster",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahp-sooyaa/sftp-autosync.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ahp-sooyaa/sftp-autosync/issues"
+  },
+  "homepage": "https://github.com/ahp-sooyaa/sftp-autosync#readme",
+  "keywords": [
+    "sftp",
+    "sync",
+    "macos",
+    "ssh",
+    "deploy",
+    "launchd",
+    "bun"
+  ],
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "bin": {
+    "sftp-autosync": "./bin/sftp-autosync.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "launchd",
+    "sync.js",
+    "config.example.json",
+    "sync-config.example.json",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "bun sync.js",
     "dev": "bun sync.js",
+    "init": "bun bin/sftp-autosync.js init",
+    "setup": "bun bin/sftp-autosync.js setup",
     "test": "bun test"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.7.0"
   }
 }

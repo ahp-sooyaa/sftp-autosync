@@ -15,11 +15,12 @@ bun install -g sftp-autosync
 # or: npm install -g sftp-autosync
 # or: brew tap ahp-sooyaa/sftp-autosync && brew install --HEAD sftp-autosync
 
-sftp-autosync init       # interactive: global config, parents, optional launchd
+sftp-autosync              # interactive command menu (in a terminal)
+sftp-autosync init         # interactive: global config, parents, optional launchd
 cd ~/Sites/my-project
-sftp-autosync setup      # interactive prompts (arrow keys to select)
-sftp-autosync push       # optional: upload whole project (or paths) now
-sftp-autosync start      # foreground watcher (or use launchd from init)
+sftp-autosync setup        # interactive prompts (arrow keys to select)
+sftp-autosync push         # optional: upload whole project (or paths) now
+sftp-autosync start        # foreground watcher (or use launchd from init)
 ```
 
 If you run `setup` before `init`, the CLI offers to run `init` first.
@@ -57,15 +58,25 @@ You should see `[watch] add project ...` for each project that has `.sftp-autosy
 ### CLI reference
 
 ```bash
+sftp-autosync                                      # interactive menu (TTY)
 sftp-autosync init [--parents ~/Sites] [--force] [--launchd|--no-launchd]
 sftp-autosync setup [projectDir] [--host …] [--username …] [--remote-path …] \
   [--private-key ~/.ssh/id_ed25519] [--port 22] [--force] [--check|--no-check] \
   [--already-synced|--push|--no-push]
+sftp-autosync config [--global | --project [dir]] [--edit | --path]
+sftp-autosync list
+sftp-autosync status [projectDir]
+sftp-autosync log [--err | --project [dir]] [--path] [--no-follow]
 sftp-autosync push [projectDir] [paths…] [--force]
 sftp-autosync start
+sftp-autosync restart
 ```
 
 In a terminal, values are gathered with interactive prompts (text + arrow-key selects). Flags skip individual questions. Non-interactive `setup` requires `--host`, `--username`, and `--remote-path`.
+
+`config` prints global or project JSON (project if cwd has `.sftp-autosync/sync-config.json`, else global). Use `--edit` to open in `$EDITOR`. After editing global config, run `restart` so the daemon reloads.
+
+`list` shows parked parents and synced projects. `status` shows launchd and per-project `status.json`. `log` tails daemon or project logs (default: follow daemon stdout).
 
 `push` uploads the whole project when no paths are given, or only the listed files/folders. Fingerprints are updated under `.sftp-autosync/content-hashes.json`.
 > Note: bare `bun init` is Bun’s own package scaffolder — use `sftp-autosync init`.

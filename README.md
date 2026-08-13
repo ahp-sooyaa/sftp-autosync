@@ -197,4 +197,4 @@ Or install the formula directly from a checkout:
 brew install --HEAD --formula Formula/sftp-autosync.rb
 ```
 
-After `v0.2.0` is tagged on GitHub, the tap formula can pin a versioned tarball with `sha256`.
+After `v0.3.0` is tagged on GitHub, the tap formula can pin a versioned tarball with `sha256`.

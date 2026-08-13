@@ -1,6 +1,6 @@
 {
   "name": "sftp-autosync",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Valet-style SFTP auto-sync daemon for macOS using Bun and OpenSSH ControlMaster",
   "type": "module",
   "license": "MIT",

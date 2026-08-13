@@ -44,8 +44,5 @@
     "push": "bun bin/sftp-autosync.js push",
     "setup": "bun bin/sftp-autosync.js setup",
     "test": "bun test"
-  },
-  "dependencies": {
-    "@clack/prompts": "^1.7.0"
   }
 }

@@ -55,6 +55,47 @@ Example `.sftp-autosync/sync-config.json`:
 
 You should see `[watch] add project ...` for each project that has `.sftp-autosync/sync-config.json`.
 
+### Push uploads
+
+```bash
+sftp-autosync push                    # whole project
+sftp-autosync push --changed          # git working-tree changes only
+sftp-autosync push index.html         # one file
+sftp-autosync push a.css b.js src/    # several files and a folder
+```
+
+`--changed` uploads files that differ from `HEAD` (staged or unstaged) plus untracked files that are not gitignored. Deletes are not pushed. Requires a git repo in the project directory.
+
+### Cursor agent skill
+
+Install the bundled skill so agents know how to set up and push without the interactive menu:
+
+```bash
+cp -R skills/sftp-autosync ~/.cursor/skills/
+```
+
+After a global install (`bun install -g sftp-autosync`), copy from the package directory instead:
+
+```bash
+cp -R "$(dirname "$(which sftp-autosync)")/../lib/node_modules/sftp-autosync/skills/sftp-autosync" ~/.cursor/skills/
+# or from a git clone: cp -R /path/to/sftp-autosync/skills/sftp-autosync ~/.cursor/skills/
+```
+
+Then say **push to remote** in Cursor — the agent should run `sftp-autosync push --changed`.
+
+### VS Code / Cursor tasks (keyboard shortcut)
+
+Copy the sample tasks into a parked project workspace:
+
+```bash
+mkdir -p ~/Sites/my-project/.vscode
+cp examples/vscode/tasks.json ~/Sites/my-project/.vscode/tasks.json
+```
+
+In Cursor: **Keyboard Shortcuts** → search **Tasks: Run Task** → bind a key (e.g. `cmd+shift+u`) → choose **SFTP: Push Current File** or **SFTP: Push Git Changed**.
+
+This is the supported stand-in for a custom **Commit & Push** pill — Cursor does not expose a public API to add buttons next to the built-in Git controls.
+
 ### CLI reference
 
 ```bash
@@ -67,7 +108,7 @@ sftp-autosync config [--global | --project [dir]] [--edit | --path]
 sftp-autosync list
 sftp-autosync status [projectDir]
 sftp-autosync log [--err | --project [dir]] [--path] [--no-follow]
-sftp-autosync push [projectDir] [paths…] [--force]
+sftp-autosync push [projectDir] [paths…] [--changed] [--force]
 sftp-autosync start
 sftp-autosync restart
 ```
@@ -78,7 +119,7 @@ In a terminal, values are gathered with interactive prompts (text + arrow-key se
 
 `list` shows parked parents and synced projects. `status` shows launchd and per-project `status.json`. `log` tails daemon or project logs (default: follow daemon stdout).
 
-`push` uploads the whole project when no paths are given, or only the listed files/folders. Fingerprints are updated under `.sftp-autosync/content-hashes.json`.
+`push` uploads the whole project when no paths are given, only git-changed files with `--changed`, or only the listed files/folders. Fingerprints are updated under `.sftp-autosync/content-hashes.json`.
 > Note: bare `bun init` is Bun’s own package scaffolder — use `sftp-autosync init`.
 
 ## Per-project visibility

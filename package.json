@@ -31,6 +31,8 @@
     "bin",
     "lib",
     "launchd",
+    "skills",
+    "examples",
     "sync.js",
     "config.example.json",
     "sync-config.example.json",

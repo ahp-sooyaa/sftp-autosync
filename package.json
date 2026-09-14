@@ -45,6 +45,10 @@
     "init": "bun bin/sftp-autosync.js init",
     "push": "bun bin/sftp-autosync.js push",
     "setup": "bun bin/sftp-autosync.js setup",
-    "test": "bun test"
+    "test": "bun test",
+    "e2e:up": "bun e2e/bootstrap.js",
+    "e2e:start": "bun sync.js --config e2e/config.json",
+    "e2e:isolate": "bun e2e/isolation-check.js",
+    "e2e:down": "bun e2e/down.js"
   }
 }

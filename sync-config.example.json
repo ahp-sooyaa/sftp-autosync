@@ -4,6 +4,7 @@
   "username": "deploy",
   "privateKeyPath": "~/.ssh/id_ed25519",
   "remotePath": "/var/www/my-project",
+  "mode": "manual",
   "routes": [
     {
       "local": "shared-assets",

@@ -1,0 +1,10 @@
+services:
+  sshd:
+    build: .
+    container_name: sftp-autosync-e2e
+    ports:
+      - "2222:22"
+    volumes:
+      - ./keys/authorized_keys:/run/keys/authorized_keys:ro
+      - ./remotes:/home/deploy/sites
+    restart: unless-stopped

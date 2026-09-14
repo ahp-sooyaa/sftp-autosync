@@ -25,12 +25,27 @@ sftp-autosync start        # foreground watcher (or use launchd from init)
 
 If you run `setup` before `init`, the CLI offers to run `init` first.
 
-During interactive `setup`, you are asked whether the project is already synced with the remote:
+During interactive `setup`, choose **Manual** (default) or **Autosync**:
+
+- **Manual** — upload only with `sftp-autosync push` (one file, several files, or a folder). The watcher does not run; no automatic remote deletes.
+- **Autosync** — watch and upload on change (like today’s launchd daemon).
+
+You are also asked whether the project is already synced with the remote:
 
 - **Yes** → seed local content hashes (no upload; trust remote already matches)
-- **No** → choose full upload now, or skip and upload only when files change
+- **No** → choose full upload now, or skip and upload later with `push`
 
-Non-interactive defaults to skip (`--no-push`). Use `--already-synced` or `--push` to opt in.
+Non-interactive setup defaults to **manual** mode and skip initial sync (`--no-push`). Use `--autosync`, `--already-synced`, or `--push` to opt in.
+
+**Switch an existing project to manual** without rewriting host/key:
+
+```bash
+cd ~/Sites/my-project
+sftp-autosync setup --manual
+sftp-autosync restart
+```
+
+Existing projects without a `mode` field keep **autosync** behavior until you change them.
 
 Global config lives at:
 
@@ -47,15 +62,18 @@ Example `.sftp-autosync/sync-config.json`:
   "username": "deploy",
   "privateKeyPath": "~/.ssh/id_ed25519",
   "remotePath": "/var/www/my-project",
+  "mode": "manual",
   "routes": [
     { "local": "shared-assets", "remote": "/var/www/shared-assets" }
   ]
 }
 ```
 
-You should see `[watch] add project ...` for each project that has `.sftp-autosync/sync-config.json`.
+You should see `[watch] add project ...` for each **autosync** project. Manual projects log `[watch] skip … (manual — sftp-autosync push)`.
 
-### Push uploads
+### Manual upload (`push`)
+
+Use `push` like an SFTP extension upload shortcut — from the project directory:
 
 ```bash
 sftp-autosync push                    # whole project
@@ -65,6 +83,8 @@ sftp-autosync push a.css b.js src/    # several files and a folder
 ```
 
 `--changed` uploads files that differ from `HEAD` (staged or unstaged) plus untracked files that are not gitignored. Deletes are not pushed. Requires a git repo in the project directory.
+
+Works for both manual and autosync projects. Manual mode is the safe default when you want to avoid idle watcher deletes on production remotes.
 
 ### Cursor agent skill
 
@@ -102,8 +122,8 @@ This is the supported stand-in for a custom **Commit & Push** pill — Cursor do
 sftp-autosync                                      # interactive menu (TTY)
 sftp-autosync init [--parents ~/Sites] [--force] [--launchd|--no-launchd]
 sftp-autosync setup [projectDir] [--host …] [--username …] [--remote-path …] \
-  [--private-key ~/.ssh/id_ed25519] [--port 22] [--force] [--check|--no-check] \
-  [--already-synced|--push|--no-push]
+  [--private-key ~/.ssh/id_ed25519] [--port 22] [--manual|--autosync] [--force] \
+  [--check|--no-check] [--already-synced|--push|--no-push]
 sftp-autosync config [--global | --project [dir]] [--edit | --path]
 sftp-autosync list
 sftp-autosync status [projectDir]
@@ -216,6 +236,72 @@ bun run init
 bun run setup
 bun test
 ```
+
+### Local OpenSSH test sandbox
+
+Use the Docker sandbox to test uploads and deletes without touching your work FileZilla host. The container runs a real OpenSSH server (`ssh`, `scp`, `rm`, and SFTP) on `127.0.0.1:2222`, with remote files mirrored on disk under `e2e/remotes/`.
+
+Two sibling parked projects are configured for isolation testing:
+
+| Project | Local | Remote on disk |
+| --- | --- | --- |
+| `demo` | `e2e/park/demo/` | `e2e/remotes/demo/` |
+| `other` | `e2e/park/other/` | `e2e/remotes/other/` |
+
+**Important:** The launchd daemon is machine-wide. Unload it before testing so work projects are not synced:
+
+```bash
+launchctl unload ~/Library/LaunchAgents/com.sftp-autosync.plist
+```
+
+Start the sandbox:
+
+```bash
+bun run e2e:up          # generate keys, write isolated configs, start Docker
+bun run e2e:start       # foreground watcher (uses e2e/config.json only)
+bun run e2e:isolate     # automated check: demo upload/delete does not touch other/
+```
+
+Edit files under `e2e/park/demo/` and inspect the remote:
+
+```bash
+ls e2e/remotes/demo
+ls e2e/remotes/other    # should stay unchanged when only demo edits
+tail -f e2e/park/demo/.sftp-autosync/sync.log
+```
+
+To verify a “delete ok” notification: check `sync.log` for `deleting` / `ok delete`, then confirm whether the file is gone in `e2e/remotes/demo/`. A successful `rm -f` also returns 0 when the path was already missing.
+
+To reproduce Cursor-agent cross-project isolation: open `e2e/park/demo` as a workspace, let the agent edit files, and confirm `e2e/remotes/other/` (and `other/.sftp-autosync/sync.log`) stay untouched.
+
+Stop the sandbox:
+
+```bash
+bun run e2e:down
+```
+
+Reload launchd when you are done testing:
+
+```bash
+sftp-autosync init --launchd
+# or: sftp-autosync restart
+```
+
+Optional: connect with FileZilla using `sftp://deploy@127.0.0.1:2222`, key `e2e/keys/id_ed25519`, remote path `/home/deploy/sites/demo` or `/home/deploy/sites/other` (same files as `e2e/remotes/demo/` and `e2e/remotes/other/` on disk).
+
+The sandbox uses its own global config (`e2e/config.json`) and SSH control socket dir (`e2e/.cm/`). It never reads or writes `~/Library/Application Support/sftp-autosync/config.json`.
+
+### Cross-project isolation and remote collisions
+
+Each parked project gets its own file watcher and maps local paths only through its own `remotePath` / `routes`. Edits in one project should not upload or delete files in another project's remote tree.
+
+If two projects are misconfigured with the same or overlapping remote paths on the same host, the daemon logs a warning at startup:
+
+```text
+[config] remote target collision: demo and other both map to deploy@127.0.0.1:2222:/sites/shared
+```
+
+Fix by giving each project a distinct `remotePath` in `.sftp-autosync/sync-config.json`.
 
 Git-based global install (no npm publish):
 

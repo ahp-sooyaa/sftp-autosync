@@ -12,6 +12,7 @@
  *   sftp-autosync push
  *   sftp-autosync start
  *   sftp-autosync restart
+ *   sftp-autosync doctor
  *
  * After `bun link` from this repo, the command is on your PATH.
  */
@@ -27,6 +28,7 @@ import { runLog } from "../lib/commands/log.js";
 import { runRestart } from "../lib/commands/restart.js";
 import { runPush } from "../lib/commands/push.js";
 import { runSetup } from "../lib/commands/setup.js";
+import { runDoctor } from "../lib/commands/doctor.js";
 
 async function runStart(argv) {
   await ensureInitialized();
@@ -100,6 +102,11 @@ async function dispatch(command, rest) {
 
   if (command === "restart") {
     await runRestart(rest);
+    return;
+  }
+
+  if (command === "doctor") {
+    await runDoctor(rest);
     return;
   }
 

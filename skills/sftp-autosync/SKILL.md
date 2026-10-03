@@ -80,8 +80,11 @@ sftp-autosync push --changed --force
 ```bash
 sftp-autosync list
 sftp-autosync status
+sftp-autosync doctor
 tail -f .sftp-autosync/sync.log
 ```
+
+`doctor` is read-only: launchd, SSH key files, BatchMode probe (unless `--no-probe`), sticky `lastError`, and corrupt hash/pending stores.
 
 ## Sync modes
 

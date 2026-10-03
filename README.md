@@ -127,6 +127,7 @@ sftp-autosync setup [projectDir] [--host …] [--username …] [--remote-path �
 sftp-autosync config [--global | --project [dir]] [--edit | --path]
 sftp-autosync list
 sftp-autosync status [projectDir]
+sftp-autosync doctor [--no-probe]
 sftp-autosync log [--err | --project [dir]] [--path] [--no-follow]
 sftp-autosync push [projectDir] [paths…] [--changed] [--force]
 sftp-autosync start

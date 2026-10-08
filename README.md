@@ -123,13 +123,13 @@ sftp-autosync                                      # interactive menu (TTY)
 sftp-autosync init [--parents ~/Sites] [--force] [--launchd|--no-launchd]
 sftp-autosync setup [projectDir] [--host …] [--username …] [--remote-path …] \
   [--private-key ~/.ssh/id_ed25519] [--port 22] [--manual|--autosync] [--force] \
-  [--check|--no-check] [--already-synced|--push|--no-push]
+  [--check|--no-check] [--already-synced|--adopt|--push|--no-push] [--delete-remote]
 sftp-autosync config [--global | --project [dir]] [--edit | --path]
 sftp-autosync list
 sftp-autosync status [projectDir]
 sftp-autosync doctor [--no-probe]
 sftp-autosync log [--err | --project [dir]] [--path] [--no-follow]
-sftp-autosync push [projectDir] [paths…] [--changed] [--force]
+sftp-autosync push [projectDir] [paths…] [--changed] [--force] [--adopt]
 sftp-autosync start
 sftp-autosync restart
 ```
@@ -140,7 +140,11 @@ In a terminal, values are gathered with interactive prompts (text + arrow-key se
 
 `list` shows parked parents and synced projects. `status` shows launchd and per-project `status.json`. `log` tails daemon or project logs (default: follow daemon stdout).
 
-`push` uploads the whole project when no paths are given, only git-changed files with `--changed`, or only the listed files/folders. Fingerprints are updated under `.sftp-autosync/content-hashes.json`.
+`push` uploads the whole project when no paths are given, only git-changed files with `--changed`, or only the listed files/folders. Fingerprints are updated under `.sftp-autosync/content-hashes.json`. `--force` re-uploads and can overwrite remotes this project does not yet own. `--adopt` records fingerprints for files that already exist on the remote (no upload). The first push into a non-empty remote without hashes is refused unless you use `--already-synced` (setup), `--adopt`, or `--force`.
+
+Remote paths must be at least three segments deep (e.g. `/var/www/my-app`). `doctor` flags shallow paths on existing configs.
+
+**Autosync deletes:** `deleteRemote` defaults to `false` — local deletes do not remove remote files. Opt in at setup (`--delete-remote` or interactive prompt). When enabled, deletes move files into `.sftp-autosync-trash/` on the remote instead of `rm`.
 > Note: bare `bun init` is Bun’s own package scaffolder — use `sftp-autosync init`.
 
 ## Per-project visibility
@@ -215,12 +219,15 @@ Per-file transfer detail still lives in each project’s `.sftp-autosync/sync.lo
 
 ## Ignore rules
 
-Default ignores: `.git`, `node_modules`, `.DS_Store`, `.sftp-autosync`, `*.tmp`, `*.swp`.
+Default ignores (global `config.json`): `.git`, `node_modules`, `.DS_Store`, `.sftp-autosync`, `*.tmp`, `*.swp`.
+
+Per-project extras: optional `ignore` array in `.sftp-autosync/sync-config.json` (merged with global).
 
 ## Notes
 
 - Default `debounceMs` is `1000` (coalesce rapid editor saves).
-- Uploads skip when file bytes match a stored fingerprint (after a successful upload, `push`, or `--already-synced` seed). Same-content IDE rewrites no longer hit the remote, including after daemon restart.
+- Uploads skip when `mtime`+`size` match the stored fingerprint, then fall back to SHA-256 when needed. Same-content IDE rewrites no longer hit the remote, including after daemon restart.
+- `sync.log` rotates at 1 MiB (`sync.log.1` backup).
 - New projects appear after you add `.sftp-autosync/sync-config.json` (parent watch + periodic rescan).
 - Connection reuse: `ControlMaster=auto` + `ControlPersist` under `~/Library/Caches/sftp-autosync/cm`.
 - Prefer `ssh-agent` for passphrase-protected keys.

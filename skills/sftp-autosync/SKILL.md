@@ -13,7 +13,8 @@ CLI for Valet-style SFTP sync on macOS. Projects live under parked parents (defa
 ## Rules
 
 - Always pass CLI flags. Never use the interactive TTY menu.
-- Prefer **manual** mode for new setup (`--manual`). No automatic watcher deletes.
+- Prefer **manual** mode for new setup (`--manual`). Autosync does not delete remotes unless `deleteRemote: true` (setup `--delete-remote`).
+- Remote paths must be deep enough (e.g. `/var/www/my-app`). Do not point at `/var/www` or wipe remote trees to “fix” sync.
 - Never commit `.sftp-autosync/` (contains host, keys, hashes, logs).
 - If launchd is already loaded, use `status` or `restart` — do not run a second `start` watcher.
 - On upload failure, read `.sftp-autosync/sync.log` and `status.json`.
@@ -69,10 +70,16 @@ For a full project upload (not git-scoped):
 sftp-autosync push
 ```
 
-Re-upload even when fingerprints match:
+Re-upload even when fingerprints match, or overwrite an unowned remote file:
 
 ```bash
 sftp-autosync push --changed --force
+```
+
+Take ownership of existing remote files without uploading:
+
+```bash
+sftp-autosync push --adopt
 ```
 
 ## Inspect state

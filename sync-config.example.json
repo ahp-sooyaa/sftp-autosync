@@ -5,6 +5,7 @@
   "privateKeyPath": "~/.ssh/id_ed25519",
   "remotePath": "/var/www/my-project",
   "mode": "manual",
+  "ignore": [".next", "dist"],
   "routes": [
     {
       "local": "shared-assets",

@@ -1,9 +1,10 @@
 ---
 name: sftp-autosync
 description: >-
-  Set up and upload files with sftp-autosync over SFTP on macOS. Use when the
-  user says push to remote, upload via SFTP, sync to the server, or set up
-  sftp-autosync for a parked project.
+  Valet-style SFTP auto-sync on macOS (parked folders under ~/Sites, deploy on
+  save). Set up and upload with sftp-autosync when the user says push to remote,
+  upload this project to the server, sync to the server, or set up SFTP for a
+  parked project.
 ---
 
 # sftp-autosync
@@ -14,6 +15,7 @@ CLI for Valet-style SFTP sync on macOS. Projects live under parked parents (defa
 
 - Always pass CLI flags. Never use the interactive TTY menu.
 - Prefer **manual** mode for new setup (`--manual`). Autosync does not delete remotes unless `deleteRemote: true` (setup `--delete-remote`).
+- Autosync will not overwrite a remote file this project has not fingerprinted; use `sftp-autosync push --adopt` or `push --force` to take ownership or overwrite.
 - Remote paths must be deep enough (e.g. `/var/www/my-app`). Do not point at `/var/www` or wipe remote trees to “fix” sync.
 - Never commit `.sftp-autosync/` (contains host, keys, hashes, logs).
 - If launchd is already loaded, use `status` or `restart` — do not run a second `start` watcher.

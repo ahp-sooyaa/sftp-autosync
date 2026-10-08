@@ -3,7 +3,7 @@
 #   brew install --HEAD ahp-sooyaa/sftp-autosync/sftp-autosync
 #
 # When pinning a stable tap formula, switch to a tarball url + sha256:
-#   curl -L https://github.com/ahp-sooyaa/sftp-autosync/archive/refs/tags/v0.3.0.tar.gz | shasum -a 256
+#   curl -L https://github.com/ahp-sooyaa/sftp-autosync/archive/refs/tags/v0.4.0.tar.gz | shasum -a 256
 
 class SftpAutosync < Formula
   desc "Valet-style SFTP auto-sync for macOS"

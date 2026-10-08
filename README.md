@@ -91,6 +91,12 @@ Works for both manual and autosync projects. Manual mode is the safe default whe
 Install the bundled skill so agents know how to set up and push without the interactive menu:
 
 ```bash
+npx skills add ahp-sooyaa/sftp-autosync
+```
+
+Or copy manually from a clone or global install:
+
+```bash
 cp -R skills/sftp-autosync ~/.cursor/skills/
 ```
 
@@ -332,4 +338,4 @@ Or install the formula directly from a checkout:
 brew install --HEAD --formula Formula/sftp-autosync.rb
 ```
 
-After `v0.3.0` is tagged on GitHub, the tap formula can pin a versioned tarball with `sha256`.
+After `v0.4.0` is tagged on GitHub, the tap formula can pin a versioned tarball with `sha256`.
